@@ -1,0 +1,65 @@
+# Pipeline configuration. Edit after inspecting the real OpenCity files
+# (run: python run_pipeline.py --only inspect)
+
+paths:
+  raw_dir: data/raw
+  clean_dir: data/clean
+  db: db/aqi.sqlite
+  reports_dir: reports
+  exports_dir: powerbi_exports
+
+# Candidate header names (case-insensitive regex, first match wins).
+timestamp_columns:
+  - '^(to ?date|from ?date|timestamp|date ?time|datetime|date)$'
+pollutant_columns:
+  PM2.5: '^pm ?2\.?5'
+  PM10: '^pm ?10'
+  NO2: '^no2|nitrogen dioxide'
+  SO2: '^so2|sulphur dioxide|sulfur dioxide'
+  CO: '^co\b|carbon monoxide'
+  O3: '^o3|ozone'
+  NH3: '^nh3|ammonia'
+
+# Station name is taken from the file name unless a column matches.
+station_column: '^(station|site)'
+timestamp_dayfirst: true
+timezone: Asia/Kolkata
+
+# Sentinel codes treated as missing, plus physical upper bounds per pollutant.
+sentinels: [-999, -99, 9999, 99999]
+valid_range:
+  PM2.5: [0, 1000]
+  PM10: [0, 2000]
+  NO2: [0, 1000]
+  SO2: [0, 2000]
+  CO: [0, 100]      # mg/m3
+  O3: [0, 1000]
+  NH3: [0, 2000]
+
+# Sub-hourly data is aggregated to hourly only when enough readings exist.
+min_subhourly_fraction: 0.75
+
+# CPCB completeness rules
+min_hours_per_day: 16
+min_pollutants_for_aqi: 3
+min_year_coverage: 0.70      # valid-day share needed to trust a station-year
+sensor_maintenance_missing_pct: 35
+
+# Source classification heuristics (indicative only)
+source:
+  dust_pm_ratio: 2.0         # PM10/PM2.5 above this suggests dust/construction
+  traffic_no2_share: 0.35    # NO2 dominant-day share above this suggests traffic
+
+# Event windows used in questions
+lockdown:
+  start: '2020-03-25'
+  end: '2020-05-31'
+diwali_dates:                # verify before publishing
+  2017: '2017-10-19'
+  2018: '2018-11-07'
+  2019: '2019-10-27'
+  2020: '2020-11-14'
+  2021: '2021-11-04'
+  2022: '2022-10-24'
+  2023: '2023-11-12'
+  2024: '2024-11-01'
